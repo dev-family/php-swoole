@@ -1,10 +1,10 @@
-FROM php:8.1.2-alpine as runtime
+FROM php:8.1.3-alpine as runtime
 
 ARG UID=1000
 ARG GID=1000
 
 ENV COMPOSER_HOME="/tmp/composer"
-ENV PHPREDIS_VERSION="5.3.6"
+ENV PHPREDIS_VERSION="5.3.7"
 ENV SWOOLE_VERSION="v4.10.0"
 
 RUN set -x \
@@ -39,7 +39,7 @@ RUN set -x \
     && docker-php-source delete \
     && apk del .build-deps
 
-COPY --from=composer:2.2.5 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.2.6 /usr/bin/composer /usr/bin/composer
 
 COPY php.ini /usr/local/etc/php/conf.d/
 
