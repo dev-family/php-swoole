@@ -5,12 +5,13 @@ ARG GID=1000
 
 ENV COMPOSER_HOME="/tmp/composer"
 ENV PHPREDIS_VERSION="5.3.7"
-ENV SWOOLE_VERSION="v4.8.7"
+ENV SWOOLE_VERSION="v4.8.8"
 
 RUN set -x \
     && apk add --no-cache \
-        postgresql-libs \
+        curl \
         npm \
+        postgresql-libs \
     && apk add --no-cache --virtual .build-deps \
         postgresql-dev \
         autoconf \
