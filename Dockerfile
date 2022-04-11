@@ -5,7 +5,7 @@ ARG GID=1000
 
 ENV COMPOSER_HOME="/tmp/composer"
 ENV PHPREDIS_VERSION="5.3.7"
-ENV SWOOLE_VERSION="v4.8.8"
+ENV SWOOLE_VERSION="v4.11.0"
 
 RUN set -x \
     && apk add --no-cache \
@@ -24,7 +24,7 @@ RUN set -x \
     && mkdir -p /usr/src/php/ext/redis \
     && curl -L https://github.com/phpredis/phpredis/archive/$PHPREDIS_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/redis/ --strip 1 \
     && mkdir -p /usr/src/php/ext/swoole \
-    && curl -L https://github.com/swoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/swoole --strip 1 \
+    && curl -L https://github.com/openswoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/swoole --strip 1 \
     && docker-php-ext-configure swoole --enable-swoole-curl \
     && CFLAGS="$CFLAGS -D_GNU_SOURCE" docker-php-ext-install -j$(nproc) \
         pdo_pgsql \
