@@ -1,4 +1,4 @@
-FROM php:8.1.3-alpine as runtime
+FROM php:8.1.4-alpine as runtime
 
 ARG UID=1000
 ARG GID=1000
