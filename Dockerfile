@@ -5,42 +5,48 @@ ARG GID=1000
 
 ENV COMPOSER_HOME="/tmp/composer"
 ENV PHPREDIS_VERSION="5.3.7"
-ENV SWOOLE_VERSION="v4.11.0"
+ENV SWOOLE_VERSION="v4.8.8"
 
 RUN set -x \
     && apk add --no-cache \
         curl \
         npm \
         postgresql-libs \
-    && apk add --no-cache --virtual .build-deps \
+        libstdc++ \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
         postgresql-dev \
-        autoconf \
-        openssl \
         curl-dev \
+        openssl-dev \
+        pcre-dev \
+        pcre2-dev \
+        zlib-dev \
+        autoconf \
         make \
-        g++ \
-    # install phpredis extension \
     && docker-php-source extract \
+    && docker-php-ext-install -j$(nproc) \
+            pdo_pgsql \
+            sockets \
+            opcache \
+            pcntl \
+            intl \
+            exif \
+            1>/dev/null \
     && mkdir -p /usr/src/php/ext/redis \
     && curl -L https://github.com/phpredis/phpredis/archive/$PHPREDIS_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/redis/ --strip 1 \
-    && mkdir -p /usr/src/php/ext/swoole \
-    && curl -L https://github.com/openswoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/swoole --strip 1 \
-    && docker-php-ext-configure swoole --enable-swoole-curl \
-    && CFLAGS="$CFLAGS -D_GNU_SOURCE" docker-php-ext-install -j$(nproc) \
-        pdo_pgsql \
-        sockets \
-        redis \
-        swoole \
-        opcache \
-        pcntl \
-        intl \
-        exif \
-        1>/dev/null \
-    # make clean up
+    && docker-php-ext-install -j$(nproc) redis \
+    && mkdir /usr/src/php/ext/swoole \
+        && curl -sfL https://github.com/swoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz -o swoole.tar.gz \
+        && tar xfz swoole.tar.gz --strip-components=1 -C /usr/src/php/ext/swoole \
+        && cd /usr/src/php/ext/swoole \
+        && phpize \
+        && ./configure --enable-openssl --enable-swoole-curl --enable-http2 \
+        && make && make install \
+        && docker-php-ext-install -j$(nproc) swoole \
+        && rm -f swoole.tar.gz $HOME/.composer/*-old.phar \
     && docker-php-source delete \
     && apk del .build-deps
 
-COPY --from=composer:2.2.6 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.3.4 /usr/bin/composer /usr/bin/composer
 
 COPY php.ini /usr/local/etc/php/conf.d/
 
